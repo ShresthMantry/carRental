@@ -5,8 +5,8 @@ const Car = function(car) {
   this.model = car.model;
   this.year = car.year;
   this.color = car.color;
-  this.dailyRate = car.dailyRate;
-  this.providerId = car.providerId;
+  this.daily_rate = car.dailyRate;
+  this.provider_id = car.provider_id;
 };
 
 Car.create = (newCar, result) => {

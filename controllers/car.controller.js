@@ -1,18 +1,19 @@
 const Car = require('../models/car.model');
 
 exports.createCar = (req, res) => {
-  const { make, model, year, color, dailyRate } = req.body;
-  const providerId = req.userId;
+  const { make, model, year, color, daily_rate } = req.body;
+  console.log(req.customer_id);
+  const provider_id = req.customer_id;
 
-  const newCar = new Car({
+  const newCar = {
     make,
     model,
     year,
     color,
-    dailyRate,
-    providerId
-  });
-
+    daily_rate,
+    provider_id
+  };
+  console.log(newCar);
   Car.create(newCar, (err, car) => {
     if (err) {
       res.status(500).json({ error: 'Error creating car' });
