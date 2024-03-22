@@ -9,32 +9,46 @@ exports.rentCar = (req, res) => {
 
   // Calculate the total cost
   const rentDuration = calculateRentDuration(start_date, end_date);
-  const total_cost = calculateTotalCost(rentDuration, car_id);
-  console.log(rentDuration);
-
-  const newRental = {
-    car_id,
-    customer_id,
-    start_date,
-    end_date,
-    total_cost
-  };
-
-  Rental.create(newRental, (err, rental) => {
+  // const total_cost = calculateTotalCost(rentDuration, car_id);
+  var total_cost = 0;
+  db.query('SELECT * FROM cars WHERE car_id = ?', car_id, (err, result) => {
     if (err) {
-      res.status(500).json({ error: 'Error creating rental' });
+      console.error('Error fetching car:', err);
       return;
     }
+    // console.log(result[0].daily_rate);
+    // const dailyRate = result[0].daily_rate;
+    total_cost = rentDuration * result[0].daily_rate;
+
+    const newRental = {
+      car_id,
+      customer_id,
+      start_date,
+      end_date,
+      total_cost
+    };
+
+
+
+    Rental.create(newRental, (err, rental) => {
+      if (err) {
+        res.status(500).json({ error: 'Error creating rental' });
+        return;
+      }
+
+    });
 
     // Update the car status to "Rented"
-    Car.updateStatus(carId, 'Rented', (err) => {
+    Car.updateStatus(car_id, 'Rented', (err) => {
       if (err) {
         res.status(500).json({ error: 'Error updating car status' });
         return;
       }
 
-      res.status(201).json({ message: 'Car rented successfully', rental });
+      res.status(201).json({ message: 'Car rented successfully' });
     });
+
+
   });
 };
 
@@ -67,17 +81,18 @@ function calculateRentDuration(startDate, endDate) {
   const rentDuration = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
   return rentDuration;
 }
-function calculateTotalCost(rentDuration, carId) {
-  db.query('SELECT * FROM cars WHERE car_id = ?', carId, (err, result) => {
-    if (err) {
-      console.error('Error fetching car:', err);
-      return;
-    }
-    // console.log(result[0].daily_rate);
-    // const dailyRate = result[0].daily_rate;
-    const totalCost = rentDuration * result[0].daily_rate;
-    console.log(totalCost);
-    return totalCost;
-  });
 
-}
+// function calculateTotalCost(rentDuration, carId) {
+//   db.query('SELECT * FROM cars WHERE car_id = ?', carId, (err, result) => {
+//     if (err) {
+//       console.error('Error fetching car:', err);
+//       return;
+//     }
+//     // console.log(result[0].daily_rate);
+//     // const dailyRate = result[0].daily_rate;
+//     const totalCost = rentDuration * result[0].daily_rate;
+//     console.log(totalCost);
+//     return totalCost;
+//   });
+
+// }

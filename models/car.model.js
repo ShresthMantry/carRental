@@ -35,4 +35,27 @@ Car.findAll = (result) => {
   });
 };
 
+Car.updateStatus = (car_id, status, result) => {
+  db.query(
+    'UPDATE cars SET status = ? WHERE car_id = ?',
+    [status, car_id],
+    (err, res) => {
+      if (err) {
+        console.error('Error updating car status:', err);
+        result(err, null);
+        return;
+      }
+
+      if (res.affectedRows === 0) {
+        // Car not found with the id
+        result({ kind: 'not_found' }, null);
+        return;
+      }
+
+      console.log('Updated car status:', { car_id, status });
+      result(null, { car_id, status });
+    }
+  );
+};
+
 module.exports = Car;
