@@ -16,8 +16,6 @@ exports.rentCar = (req, res) => {
       console.error('Error fetching car:', err);
       return;
     }
-    // console.log(result[0].daily_rate);
-    // const dailyRate = result[0].daily_rate;
     total_cost = rentDuration * result[0].daily_rate;
 
     const newRental = {
@@ -28,6 +26,7 @@ exports.rentCar = (req, res) => {
       total_cost
     };
 
+    req.rental = newRental;
 
 
     Rental.create(newRental, (err, rental) => {
@@ -53,25 +52,38 @@ exports.rentCar = (req, res) => {
 };
 
 exports.makePayment = (req, res) => {
-  const { rentalId, paymentMethod } = req.body;
-  const paymentDate = new Date();
-  const amount = req.rental.totalCost; // Assuming the total cost is available in req.rental
-
-  const newPayment = new Payment({
-    rentalId,
-    paymentDate,
-    paymentMethod,
-    amount
-  });
-
-  Payment.create(newPayment, (err, payment) => {
+  const { rental_id, payment_method } = req.body;
+  const payment_date = new Date();
+  // const amount = req.rental.total_cost; // Assuming the total cost is available in req.rental
+  var amount = 0;
+  db.query('SELECT * FROM rentals WHERE rental_id = ?', rental_id, (err, result) => {
     if (err) {
-      res.status(500).json({ error: 'Error making payment' });
+      console.error('Error fetching rental:', err);
       return;
     }
+    amount = result[0].total_cost;
 
-    res.status(201).json({ message: 'Payment successful', payment });
+
+
+    const newPayment = {
+      rental_id,
+      payment_date,
+      payment_method,
+      amount
+    };
+
+    Payment.create(newPayment, (err, payment) => {
+      if (err) {
+        res.status(500).json({ error: 'Error making payment' });
+        return;
+      }
+
+      res.status(201).json({ message: 'Payment successful', payment });
+    });
+
+
   });
+
 };
 
 // Helper functions
@@ -82,17 +94,3 @@ function calculateRentDuration(startDate, endDate) {
   return rentDuration;
 }
 
-// function calculateTotalCost(rentDuration, carId) {
-//   db.query('SELECT * FROM cars WHERE car_id = ?', carId, (err, result) => {
-//     if (err) {
-//       console.error('Error fetching car:', err);
-//       return;
-//     }
-//     // console.log(result[0].daily_rate);
-//     // const dailyRate = result[0].daily_rate;
-//     const totalCost = rentDuration * result[0].daily_rate;
-//     console.log(totalCost);
-//     return totalCost;
-//   });
-
-// }
