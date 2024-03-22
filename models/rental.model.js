@@ -1,11 +1,11 @@
 const db = require('../config/db.config');
 
 const Rental = function(rental) {
-  this.carId = rental.carId;
-  this.customerId = rental.customerId;
-  this.startDate = rental.startDate;
-  this.endDate = rental.endDate;
-  this.totalCost = rental.totalCost;
+  this.car_id = rental.car_id;
+  this.customer_id = rental.customer_id;
+  this.start_date = rental.start_date;
+  this.end_date = rental.end_date;
+  this.total_cost = rental.total_cost;
 };
 
 Rental.create = (newRental, result) => {

@@ -1,22 +1,24 @@
 const Rental = require('../models/rental.model');
 const Payment = require('../models/payment.model');
 const Car = require('../models/car.model');
+const db = require("../config/db.config")
 
 exports.rentCar = (req, res) => {
-  const { carId, startDate, endDate } = req.body;
-  const customerId = req.userId;
+  const { car_id, start_date, end_date } = req.body;
+  const customer_id = req.customer_id; // Assuming the customer ID is available in req.customer_id
 
   // Calculate the total cost
-  const rentDuration = calculateRentDuration(startDate, endDate);
-  const totalCost = calculateTotalCost(rentDuration, carId);
+  const rentDuration = calculateRentDuration(start_date, end_date);
+  const total_cost = calculateTotalCost(rentDuration, car_id);
+  console.log(rentDuration);
 
-  const newRental = new Rental({
-    carId,
-    customerId,
-    startDate,
-    endDate,
-    totalCost
-  });
+  const newRental = {
+    car_id,
+    customer_id,
+    start_date,
+    end_date,
+    total_cost
+  };
 
   Rental.create(newRental, (err, rental) => {
     if (err) {
@@ -65,9 +67,17 @@ function calculateRentDuration(startDate, endDate) {
   const rentDuration = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
   return rentDuration;
 }
-
 function calculateTotalCost(rentDuration, carId) {
-  // Retrieve the daily rate for the car
-  // Calculate the total cost based on the rent duration and daily rate
-  // Return the total cost
+  db.query('SELECT * FROM cars WHERE car_id = ?', carId, (err, result) => {
+    if (err) {
+      console.error('Error fetching car:', err);
+      return;
+    }
+    // console.log(result[0].daily_rate);
+    // const dailyRate = result[0].daily_rate;
+    const totalCost = rentDuration * result[0].daily_rate;
+    console.log(totalCost);
+    return totalCost;
+  });
+
 }
